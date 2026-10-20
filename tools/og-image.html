@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Ảnh xem trước</title>
+  <!--
+    Khung 1200×630 để chụp ảnh xem trước (og:image) cho từng link.
+    ?p=me | tam-doan | hai-doan  → ảnh của từng người; bỏ trống → ảnh link chung.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600&family=Dancing+Script:wght@700&family=Lora:ital,wght@0,600;1,400&display=block">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    html { scrollbar-gutter: auto; overflow: hidden; }
+    body { width: 1200px; height: 630px; overflow: hidden; }
+    .og, .og * { animation: none !important; }
+    .og {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      width: 1200px;
+      height: 630px;
+      padding: 0 80px 0 70px;
+    }
+    .og__art {
+      position: relative;
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 470px;
+      height: 470px;
+    }
+    .og__art .portrait { width: 450px; }
+    .og__art .giftbox { width: 380px; }
+    .og__art .og__bloom { position: absolute; width: 96px; height: 96px; }
+    .og__text { flex: 1; min-width: 0; }
+    .og__date {
+      padding-left: 0.3em;
+      font: 600 26px/1 var(--font-sans);
+      letter-spacing: 0.3em;
+      color: var(--gold);
+    }
+    .og__title {
+      margin-top: 20px;
+      font: 700 132px/1.02 var(--font-script);
+      color: var(--accent-deep);
+    }
+    .og__sub {
+      max-width: 16ch;
+      margin-top: 22px;
+      font: italic 400 40px/1.35 var(--font-serif);
+      color: var(--ink-soft);
+    }
+    .og__petal {
+      position: absolute;
+      fill: #f6a5c0;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="og" id="og"></div>
+
+  <script src="../js/content.js"></script>
+  <script src="../js/art.js"></script>
+  <script>
+    (function () {
+      var C = window.CONTENT, A = window.ART;
+      var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
+      var slug = new URLSearchParams(location.search).get('p');
+      var p = C.people.find(function (x) { return x.slug === slug; });
+      var og = document.getElementById('og');
+
+      var petal = 'M0 10C-10.5 2.5-8.5-9.5-1.8-9.2Q0-6.2 1.8-9.2C8.5-9.5 10.5 2.5 0 10Z';
+      var spots = [[40, 50, 1.5, 20], [560, 36, 1.1, -30], [1120, 80, 1.7, 45], [1100, 540, 1.3, 10],
+                   [640, 560, 1.15, 70], [36, 540, 1.25, -50], [860, 22, 0.95, 120], [470, 300, 0.8, 200]];
+      var petals = spots.map(function (s) {
+        var size = Math.round(24 * s[2]);
+        return '<svg class="og__petal" style="left:' + s[0] + 'px;top:' + s[1] + 'px;width:' + size + 'px;height:' + size +
+          'px" viewBox="-12 -12 24 24" aria-hidden="true"><path transform="rotate(' + s[3] + ')" d="' + petal + '"/></svg>';
+      }).join('');
+
+      var art, title, sub;
+      if (p) {
+        og.classList.add('theme-' + p.theme);
+        art = '<div class="portrait"><div class="portrait__photo"><div class="portrait__fallback">' + A.flower(p.theme) +
+          '</div></div>' + A.wreath(p.theme) + '</div>';
+        title = p.name;
+        sub = p.share;
+      } else {
+        art = A.giftBox() +
+          '<span class="og__bloom theme-rose" style="left:6px;top:40px">' + A.flower('rose') + '</span>' +
+          '<span class="og__bloom theme-lilac" style="right:0;top:110px">' + A.flower('lilac') + '</span>' +
+          '<span class="og__bloom theme-sea" style="left:30px;bottom:40px">' + A.flower('sea') + '</span>';
+        title = C.share.title;
+        sub = C.share.text;
+        // Không để tên bị tách xuống hai dòng
+        C.people.forEach(function (x) { sub = sub.split(x.name).join(x.name.replace(/ /g, ' ')); });
+      }
+
+      og.innerHTML = petals +
+        '<div class="og__art">' + art + '</div>' +
+        '<div class="og__text"><p class="og__date">20 · 10 · ' + esc(C.year) + '</p>' +
+        '<h1 class="og__title">' + esc(title) + '</h1>' +
+        '<p class="og__sub">' + esc(sub) + '</p></div>';
+    })();
+  </script>
+</body>
+</html>
